@@ -20,9 +20,9 @@ class Component extends \CApplicationComponent
      * @return reader\AbstractReader
      * @throws \CException 
      */
-    public function makeReader($filepath)
+    public function makeReader($filePath, $params = array())
     {
-        $extenstion = pathinfo($filepath, PATHINFO_EXTENSION);
+        $extenstion = pathinfo($filePath, PATHINFO_EXTENSION);
         
         if ( !isset($this->readersMap[$extenstion]) ) {
             throw new \CException('No reader for extenstion "' . $extenstion . '"');
@@ -30,11 +30,13 @@ class Component extends \CApplicationComponent
         
         $class = $this->readersMap[$extenstion];
         
-        $reader = \Yii::createComponent(array(
+        $params = array_merge(array(
             'class' => $class,
-            'filepath' => $filepath,
-        ));
+            'filePath' => $filePath,
+        ), $params);
         
+        $reader = \Yii::createComponent($params);
+        $reader->init();
         return $reader;
     }
 }
