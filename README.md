@@ -27,3 +27,11 @@ Yii::setPathOfAlias('importreader', dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.D
     'class' => '\importreader\Component',
 ),
 ```
+
+TODO
+----
+
+* More documentation
+* Ability to parse first row as labels array
+* PHPExcel attaching configuration
+* CSV reader
