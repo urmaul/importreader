@@ -2,8 +2,6 @@
 
 namespace importreader;
 
-if (!class_exists('\importreader\Component')) {
-
 class Component extends \CApplicationComponent
 {
     /**
@@ -39,6 +37,4 @@ class Component extends \CApplicationComponent
         $reader->init();
         return $reader;
     }
-}
-
 }
