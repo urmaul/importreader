@@ -4,6 +4,11 @@ namespace importreader\reader;
 
 class Xls extends AbstractReader
 {
+    /**
+     * PHPExcel directory path alias
+     * @var string 
+     */
+    public $phpExcelPathAlias = 'ext.phpexcel';
 
     /**
      * @var \PHPExcel_Worksheet 
@@ -15,32 +20,14 @@ class Xls extends AbstractReader
     {
         parent::init();
         
-        $phpExcelPath = \Yii::getPathOfAlias('ext.phpexcel');
-		spl_autoload_unregister(array('YiiBase','autoload'));
-		require_once $phpExcelPath . DIRECTORY_SEPARATOR . 'PHPExcel.php';
+        spl_autoload_unregister(array('YiiBase','autoload'));
+		$path = \Yii::getPathOfAlias($this->phpExcelPathAlias . '.PHPExcel');
+		require_once $path . '.php';
 		
 		$objPHPExcel = \PHPExcel_IOFactory::load($this->filePath);
         $objPHPExcel->setActiveSheetIndex(0);
         $this->sheet = $objPHPExcel->getActiveSheet();
         spl_autoload_register(array('YiiBase','autoload'));
-        
-        /*$rowIndex = 0;
-        $cellIndex = 0;
-        
-        $fileData = array();
-        foreach($aSheet->getRowIterator() as $row)
-        {
-        	$cellIterator = $row->getCellIterator();
-        	
-        	foreach($cellIterator as $cell) 
-        	{
-        		$fileData[$rowIndex][$cellIndex] = $cell->getCalculatedValue();
-        		$cellIndex++;
-        	}
-        	
-        	$rowIndex++;
-        	$cellIndex = 0;
-        }*/
         
         $this->colsCount = count($this->labels);
     }
@@ -70,6 +57,7 @@ class Xls extends AbstractReader
     
     ### Xls reading methods ###
     
+    // See parent phpDoc
     protected function getRow()
     {
         $row = array();

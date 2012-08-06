@@ -4,10 +4,23 @@ namespace importreader\reader;
 
 abstract class AbstractReader extends \CComponent implements \Iterator
 {
+    /**
+     * Input file path
+     * @var string 
+     */
     public $filePath;
 
+    /**
+     * Labels array.
+     * You may use empty value as label if you want to ignote that field.
+     * @var array integer => string
+     */
     public $labels;
     
+    /**
+     * Callback function to prepare row before returning
+     * @var callable
+     */
     public $callback;
 
 
@@ -30,7 +43,8 @@ abstract class AbstractReader extends \CComponent implements \Iterator
     }
 
     /**
-     * Return the current element
+     * Returns row array with labels as keys.
+     * Row is updated using callback.
      * @return array label => value
      */
     public function current()
@@ -66,8 +80,16 @@ abstract class AbstractReader extends \CComponent implements \Iterator
     
     ### Reading methods ###
     
+    /**
+     * Returns row array with offsets as keys.
+     * @return array integer => mixed
+     */
     abstract protected function getRow();
     
+    /**
+     * Returns row array with labels as keys.
+     * @return array string => mixed
+     */
     protected function getLabeledRow()
     {
         $labels = $this->labels;
@@ -80,6 +102,11 @@ abstract class AbstractReader extends \CComponent implements \Iterator
         return $row;
     }
     
+    /**
+     * Runs callbask if it is registered
+     * @param array $row labeled row
+     * @return array updated labeled row
+     */
     protected function useCallback($row)
     {
         if (is_callable($this->callback))

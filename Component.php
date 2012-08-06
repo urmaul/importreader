@@ -14,7 +14,8 @@ class Component extends \CApplicationComponent
 
     /**
      * Creates and inits file reader instance
-     * @param string $filepath
+     * @param string $filePath input file path
+     * @param array $params reader params. See reader class public properties.
      * @return reader\AbstractReader
      * @throws \CException 
      */
