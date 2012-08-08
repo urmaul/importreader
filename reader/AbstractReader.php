@@ -11,6 +11,13 @@ abstract class AbstractReader extends \CComponent implements \Iterator
     public $filePath;
 
     /**
+     * True if you want to use string labels as row items keys.
+     * False if you want to use integer indexes as row items keys.
+     * @var boolean
+     */
+    public $useLabels = true;
+    
+    /**
      * Labels array.
      * You may use empty value as label if you want to ignote that field.
      * @var array integer => string
@@ -23,13 +30,21 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      */
     public $callback;
 
+    /**
+     * Count of columns we need to read.
+     * This value will be overwritten if you set "useLabels" property to true.
+     * @var integer
+     */
+    protected $colsCount = 1;
 
-    protected $colsCount;
-
+    
     protected $position = 0;
     
     public function init()
     {
+        if ($this->useLabels) {
+            $this->colsCount = count($this->labels);
+        }
     }
     
     ### Iterator methods ###
@@ -118,14 +133,17 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      */
     protected function getLabeledRow()
     {
-        $labels = $this->labels;
-        $values = $this->getRow();
-        
-        $row = array_combine($labels, $values);
-        
-        unset($row['']); // Remove values with null labels
-        
-        return $row;
+        if ($this->useLabels) {
+            $labels = $this->labels;
+            $values = $this->getRow();
+
+            $row = array_combine($labels, $values);
+
+            unset($row['']); // Remove values with null labels
+
+            return $row;
+        } else
+            return $this->getRow();
     }
     
     /**

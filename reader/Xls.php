@@ -18,8 +18,6 @@ class Xls extends AbstractReader
 
     public function init()
     {
-        parent::init();
-        
         spl_autoload_unregister(array('YiiBase','autoload'));
 		$path = \Yii::getPathOfAlias($this->phpExcelPathAlias . '.PHPExcel');
 		require_once $path . '.php';
@@ -29,7 +27,7 @@ class Xls extends AbstractReader
         $this->sheet = $objPHPExcel->getActiveSheet();
         spl_autoload_register(array('YiiBase','autoload'));
         
-        $this->colsCount = count($this->labels);
+        parent::init();
     }
     
     
