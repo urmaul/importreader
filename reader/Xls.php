@@ -38,8 +38,8 @@ class Xls extends AbstractReader
      */
     public function rewind() 
     {
-        // Starts from 1 + 1 row for labels
-        $this->position = 2;
+        // Starts from 1
+        $this->position = 1 + $this->firstRowPosition();
     }
     
     

@@ -11,6 +11,12 @@ abstract class AbstractReader extends \CComponent implements \Iterator
     public $filePath;
 
     /**
+     * Count of rows at start that reader will ignore
+     * @var integer
+     */
+    public $ignoredRowsCount = 1;
+
+    /**
      * True if you want to use string labels as row items keys.
      * False if you want to use integer indexes as row items keys.
      * @var boolean
@@ -29,7 +35,7 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      * @var callable
      */
     public $callback;
-
+    
     /**
      * Count of columns we need to read.
      * This value will be overwritten if you set "useLabels" property to true.
@@ -54,7 +60,7 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      */
     public function rewind() 
     {
-        $this->position = 0;
+        $this->position = $this->firstRowPosition();
     }
 
     /**
@@ -99,6 +105,11 @@ abstract class AbstractReader extends \CComponent implements \Iterator
     
     ### Reading methods ###
     
+    protected function firstRowPosition()
+    {
+        return $this->ignoredRowsCount;
+    }
+
     /**
      * Returns row array with offsets as keys.
      * @return array integer => mixed
