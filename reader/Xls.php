@@ -44,31 +44,13 @@ class Xls extends AbstractReader
         $this->position = 2;
     }
     
-    /**
-     * Checks if current position is valid
-     * @return boolean
-     */
-    public function valid()
-    {
-        $val = $this->getCellValue(1, $this->position);
-        return !empty($val);
-    }
-    
     
     ### Xls reading methods ###
     
     // See parent phpDoc
-    protected function getRow()
+    protected function getItem($index)
     {
-        $row = array();
-        
-        $iRow = $this->position;
-        
-        for ($iCol=0; $iCol<$this->colsCount; ++$iCol) {
-            $row[] = $this->getCellValue($iCol, $iRow);
-        }
-        
-        return $row;
+        return $this->getCellValue($index, $this->position);
     }
 
 

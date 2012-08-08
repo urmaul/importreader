@@ -75,7 +75,11 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      * Checks if current position is valid
      * @return boolean
      */
-    #abstract public function valid();
+    public function valid()
+    {
+        $item = $this->getItem(0);
+        return !empty($item);
+    }
     
     
     ### Reading methods ###
@@ -84,7 +88,29 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      * Returns row array with offsets as keys.
      * @return array integer => mixed
      */
-    abstract protected function getRow();
+    protected function getRow()
+    {
+        $row = array();
+        
+        for ($index=0; $index<$this->colsCount; ++$index) {
+            $row[] = $this->getItem($index);
+        }
+        
+        return $row;
+    }
+    
+    /**
+     * Returns current row item with given index.
+     * You need 
+     * @param integer $index
+     * @return mixed item value
+     */
+    protected function getItem($index)
+    {
+        throw new \CException(__METHOD__ . ' is not overridden and called');
+        
+        array($index); // Just to get rid of warning
+    }
     
     /**
      * Returns row array with labels as keys.
