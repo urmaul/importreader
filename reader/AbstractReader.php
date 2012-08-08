@@ -41,7 +41,7 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      * This value will be overwritten if you set "useLabels" property to true.
      * @var integer
      */
-    protected $colsCount = 1;
+    public $colsCount = 1;
 
     
     protected $position = 0;
