@@ -53,3 +53,4 @@ TODO
 * Ability to parse first row as labels array
 * PHPExcel attaching configuration
 * CSV reader
+* Include PHPExcel into extension
