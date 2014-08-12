@@ -1,0 +1,22 @@
+{
+    "name": "urmaul/importreader",
+    "type": "library",
+    "description": "Import Table files reader.",
+    "keywords": ["import", "xls", "ods"],
+    "homepage": "https://github.com/urmaul/importreader",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bogdan Kolbik"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "phpoffice/phpexcel": "~1.8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "importreader\\": "src"
+        }
+    }
+}

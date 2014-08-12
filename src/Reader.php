@@ -1,8 +1,8 @@
 <?php
 
-namespace importreader\reader;
+namespace importreader;
 
-abstract class AbstractReader extends \CComponent implements \Iterator
+class Reader implements \Iterator
 {
     /**
      * Input file path
@@ -14,14 +14,14 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      * Count of rows at start that reader will ignore
      * @var integer
      */
-    public $ignoredRowsCount = 1;
+    public $ignoredRowsCount = 0;
 
     /**
      * True if you want to use string labels as row items keys.
      * False if you want to use integer indexes as row items keys.
      * @var boolean
      */
-    public $useLabels = true;
+    public $useLabels = false;
     
     /**
      * Labels array.
@@ -42,8 +42,29 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      * @var integer
      */
     public $colsCount = 1;
-
     
+    
+    /**
+     * @var \PHPExcel_Worksheet 
+     */
+    protected $reader;
+
+    protected $excel;
+    
+    /**
+     * @var xls\Filter 
+     */
+    protected $filter;
+
+    /**
+     * @var \PHPExcel_Worksheet 
+     */
+    protected $sheet;
+    
+    
+    protected $lastRowPosition = null;
+    protected $lastRow;
+
     protected $position = 0;
     
     public function init()
@@ -51,6 +72,25 @@ abstract class AbstractReader extends \CComponent implements \Iterator
         if ($this->useLabels) {
             $this->colsCount = count($this->labels);
         }
+        
+        $this->filter = new Filter($this->colsCount);
+        
+        $reader = \PHPExcel_IOFactory::createReaderForFile($this->filePath);
+        /* @var $reader \PHPExcel_Reader_IReader */
+        
+        $reader->setReadDataOnly(true);
+        $reader->setReadFilter($this->filter);
+        
+        if (method_exists($reader, 'listWorksheetNames')) {
+            $sheets = $reader->listWorksheetNames($this->filePath);
+            $reader->setLoadSheetsOnly( array($sheets[0]) );
+        }
+        
+        $this->reader = $reader;
+        
+        $this->excel = $this->reader->load($this->filePath);
+        $this->excel->setActiveSheetIndex(0);
+        $this->sheet = $this->excel->getActiveSheet();
     }
     
     ### Iterator methods ###
@@ -60,7 +100,10 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      */
     public function rewind() 
     {
-        $this->position = $this->firstRowPosition();
+        // Starts from 1
+        $this->position = 1 + $this->firstRowPosition();
+        //$this->position = $this->firstRowPosition();
+        return $this->current();
     }
 
     /**
@@ -90,6 +133,7 @@ abstract class AbstractReader extends \CComponent implements \Iterator
     public function next() 
     {
         ++$this->position;
+        return $this->current();
     }
 
     /**
@@ -116,26 +160,54 @@ abstract class AbstractReader extends \CComponent implements \Iterator
      */
     protected function getRow()
     {
-        $row = array();
-        
-        for ($index=0; $index<$this->colsCount; ++$index) {
-            $row[] = $this->getItem($index);
+        // Try to return cached value
+        if ($this->position == $this->lastRowPosition) {
+            return $this->lastRow;
         }
+        
+        $range = sprintf('A%d:%s%1$d',
+            $this->position,
+            \PHPExcel_Cell::stringFromColumnIndex($this->colsCount-1)
+        );
+        $rows = $this->sheet->rangeToArray($range);
+        $row = array_pop($rows);
+
+        // Cache value
+        $this->lastRowPosition = $this->position;
+        $this->lastRow = $row;
         
         return $row;
     }
     
-    /**
-     * Returns current row item with given index.
-     * You need 
-     * @param integer $index
-     * @return mixed item value
-     */
+    // See parent phpDoc
     protected function getItem($index)
     {
-        throw new \CException(__METHOD__ . ' is not overridden and called');
-        
-        array($index); // Just to get rid of warning
+        $row = $this->getRow();
+        return $row[$index];
+    }
+
+
+    /**
+     *
+     * @param integer $col
+     * @param integer $row 
+     * @return \PHPExcel_Cell
+     */
+    protected function getCell($col, $row)
+    {
+        $coodrinate = \PHPExcel_Cell::stringFromColumnIndex($col) . $row;
+        return $this->sheet->getCell($coodrinate);
+    }
+    
+    /**
+     *
+     * @param integer $col
+     * @param integer $row 
+     * @return mixed
+     */
+    protected function getCellValue($col, $row)
+    {
+        return $this->getCell($col, $row)->getCalculatedValue();
     }
     
     /**
@@ -153,6 +225,7 @@ abstract class AbstractReader extends \CComponent implements \Iterator
             unset($row['']); // Remove values with null labels
 
             return $row;
+            
         } else
             return $this->getRow();
     }

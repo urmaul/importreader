@@ -1,6 +1,6 @@
 <?php
 
-namespace importreader\reader\xls;
+namespace importreader;
 
 class Filter implements \PHPExcel_Reader_IReadFilter
 {
