@@ -41,7 +41,7 @@ class Reader implements \Iterator
      * This value will be overwritten if you set "useLabels" property to true.
      * @var integer
      */
-    public $colsCount = 1;
+    public $colsCount;
     
     
     /**
@@ -69,18 +69,12 @@ class Reader implements \Iterator
     
     public function init()
     {
-        if ($this->useLabels) {
-            $this->colsCount = count($this->labels);
-        }
-        
-        $this->filter = new Filter($this->colsCount);
-        
         $reader = \PHPExcel_IOFactory::createReaderForFile($this->filePath);
         /* @var $reader \PHPExcel_Reader_IReader */
         
         $reader->setReadDataOnly(true);
-        $reader->setReadFilter($this->filter);
         
+        // Load only 1st sheet
         if (method_exists($reader, 'listWorksheetNames')) {
             $sheets = $reader->listWorksheetNames($this->filePath);
             $reader->setLoadSheetsOnly( array($sheets[0]) );
@@ -91,6 +85,20 @@ class Reader implements \Iterator
         $this->excel = $this->reader->load($this->filePath);
         $this->excel->setActiveSheetIndex(0);
         $this->sheet = $this->excel->getActiveSheet();
+        
+        if ($this->useLabels) {
+			if ($this->labels === null) {
+				$this->labels = $this->readLabelsRow();
+				$this->ignoredRowsCount++; // To pass labels row when reading data
+			}
+            $this->colsCount = count($this->labels);
+        }
+        
+        if ($this->colsCount === null)
+			throw new Exception(__CLASS__.'->colsCount not set.');
+		
+        $this->filter = new Filter($this->colsCount);
+        $reader->setReadFilter($this->filter);
     }
     
     public function readAll()
@@ -167,6 +175,24 @@ class Reader implements \Iterator
     {
         return $this->ignoredRowsCount;
     }
+    
+    protected function readLabelsRow()
+    {
+		$labels = array();
+		
+		$row = 1;
+		$col = 0;
+		do {
+			$label = $this->getCellValue($col, $row);
+			
+			if (!empty($label))
+				$labels[] = $label;
+			
+			$col++;
+		} while (!empty($label));
+		
+		return $labels;
+	}
     
     /**
      * Returns row array with offsets as keys.

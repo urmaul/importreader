@@ -62,6 +62,26 @@ class OdsTest extends PHPUnit_Framework_TestCase
         }
     }
     
+    public function testReadLabels()
+    {
+        $reader = new Reader();
+        $reader->filePath = __DIR__ . '/files/3cols.ods';
+        $reader->useLabels = true;
+        $reader->init();
+        
+        $this->assertEquals(array('first', 'second', 'third'), $reader->labels);
+        
+        $expecteds = array(
+            array('first' => '1',  'second' => '2',  'third' => '3'),
+            array('first' => 's1', 'second' => 's2', 'third' => 's3'),
+        );
+        
+        foreach ($reader as $actual) {
+            $expected = array_shift($expecteds);
+            $this->assertEquals($expected, $actual);
+        }
+    }
+    
 	public function testReadAll()
     {
         $reader = new Reader();
