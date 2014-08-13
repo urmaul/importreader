@@ -61,4 +61,20 @@ class OdsTest extends PHPUnit_Framework_TestCase
             $this->assertEquals($expected, $actual);
         }
     }
+    
+	public function testReadAll()
+    {
+        $reader = new Reader();
+        $reader->filePath = __DIR__ . '/files/3cols.ods';
+        $reader->colsCount = 3;
+        $reader->init();
+        
+        $expecteds = array(
+            array('first', 'second', 'third'),
+            array('1', '2', '3'),
+            array('s1', 's2', 's3'),
+        );
+        
+        $this->assertEquals($expecteds, $reader->readAll());
+    }
 }

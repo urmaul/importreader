@@ -93,6 +93,20 @@ class Reader implements \Iterator
         $this->sheet = $this->excel->getActiveSheet();
     }
     
+    public function readAll()
+    {
+		if (!$this->reader)
+			$this->init();
+		
+		$rows = array();
+		
+		foreach ($this as $row) {
+			$rows[] = $row;
+		}
+		
+		return $rows;
+	}
+    
     ### Iterator methods ###
     
     /**
@@ -153,7 +167,7 @@ class Reader implements \Iterator
     {
         return $this->ignoredRowsCount;
     }
-
+    
     /**
      * Returns row array with offsets as keys.
      * @return array integer => mixed
