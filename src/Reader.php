@@ -87,33 +87,60 @@ class Reader implements \Iterator
         $this->sheet = $this->excel->getActiveSheet();
         
         if ($this->useLabels) {
-			if ($this->labels === null) {
-				$this->labels = $this->readLabelsRow();
-				$this->ignoredRowsCount++; // To pass labels row when reading data
-			}
+            if ($this->labels === null) {
+                $this->labels = $this->readLabelsRow();
+                $this->ignoredRowsCount++; // To pass labels row when reading data
+            }
             $this->colsCount = count($this->labels);
         }
         
-        if ($this->colsCount === null)
-			throw new Exception(__CLASS__.'->colsCount not set.');
-		
+        if ($this->colsCount === null) {
+            throw new Exception(__CLASS__.'->colsCount not set.');
+        }
+        
         $this->filter = new Filter($this->colsCount);
         $reader->setReadFilter($this->filter);
     }
     
+    /**
+     * Reads all rows into array.
+     * @return array[]
+     */
     public function readAll()
     {
-		if (!$this->reader)
-			$this->init();
-		
-		$rows = array();
-		
-		foreach ($this as $row) {
-			$rows[] = $row;
-		}
-		
-		return $rows;
-	}
+        if (!$this->reader) {
+            $this->init();
+        }
+        
+        $rows = array();
+        foreach ($this as $row) {
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+    
+    /**
+     * Reads specific column into array.
+     * @param integer $index
+     * @return string[]
+     */
+    public function readColumn($index)
+    {
+        if (!$this->reader) {
+            $this->init();
+        }
+        
+        if ($index >= $this->colsCount) {
+            throw new Exception('Column index can`t be equal or more than .');
+        }
+        
+        $values = array();
+        foreach ($this as $row) {
+            $row = $this->getRow();
+            $values[] = $row[$index];
+        }
+        return $values;
+    }
     
     ### Iterator methods ###
     
@@ -178,21 +205,21 @@ class Reader implements \Iterator
     
     protected function readLabelsRow()
     {
-		$labels = array();
-		
-		$row = 1;
-		$col = 0;
-		do {
-			$label = $this->getCellValue($col, $row);
-			
-			if (!empty($label))
-				$labels[] = $label;
-			
-			$col++;
-		} while (!empty($label));
-		
-		return $labels;
-	}
+        $labels = array();
+        
+        $row = 1;
+        $col = 0;
+        do {
+            $label = $this->getCellValue($col, $row);
+            
+            if (!empty($label))
+                $labels[] = $label;
+            
+            $col++;
+        } while (!empty($label));
+        
+        return $labels;
+    }
     
     /**
      * Returns row array with offsets as keys.
